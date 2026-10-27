@@ -1,0 +1,46 @@
+name: Deploy NetRoute to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: netroute/package-lock.json
+
+      - name: Install dependencies
+        working-directory: netroute
+        run: npm ci
+
+      - name: Build project
+        working-directory: netroute
+        run: npm run build
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload website
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: netroute/dist
+
+      - name: Deploy website
+        id: deployment
+        uses: actions/deploy-pages@v4
